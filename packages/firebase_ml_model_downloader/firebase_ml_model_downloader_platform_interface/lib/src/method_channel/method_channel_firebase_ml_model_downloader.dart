@@ -48,7 +48,7 @@ class MethodChannelFirebaseModelDownloader
   ) async {
     try {
       final result = await channel.invokeMapMethod<String, dynamic>(
-          'FirebaseModelDownloader#getModel', {
+        'FirebaseModelDownloader#getModel', {
         'appName': app.name,
         'modelName': modelName,
         'downloadType': _downloadTypeToString(downloadType),

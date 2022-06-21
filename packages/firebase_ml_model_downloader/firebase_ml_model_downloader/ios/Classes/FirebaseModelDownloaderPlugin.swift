@@ -120,21 +120,35 @@ public class FirebaseModelDownloaderPluginSwift: FLTFirebasePlugin, FlutterPlugi
       downloadTypeEnum = ModelDownloadType.latestModel
     }
 
-    let modelDownloadConditions = ModelDownloadConditions(allowsCellularAccess: cellularAccess)
-
-    modelDownloader?.getModel(name: modelName, downloadType: downloadTypeEnum, conditions: modelDownloadConditions) { response in
-      switch response {
-      case let .success(customModel):
-        result.success([
-          "filePath": customModel.path,
-          "size": customModel.size,
-          "hash": customModel.hash,
-          "name": customModel.name,
-        ])
-      case let .failure(error):
-        result.error(nil, nil, nil, error)
-      }
+    let downloadConditions = ModelDownloadConditions(allowsCellularAccess: false)
+    ModelDownloader.modelDownloader()
+    .getModel(name: modelName,
+              downloadType: .latestModel,
+              conditions: downloadConditions,
+              progressHandler: { progress in
+                // Handle progress.
+              }) { result in
+        // Handle download result.
+        switch result {
+        case let .success(model): // Use model.
+        case let .failure(error): // Handle error.
+        }
     }
+    // let modelDownloadConditions = ModelDownloadConditions(allowsCellularAccess: cellularAccess)
+
+    // modelDownloader?.getModel(name: modelName, downloadType: downloadTypeEnum, conditions: modelDownloadConditions) { response in
+    //   switch response {
+    //   case let .success(customModel):
+    //     result.success([
+    //       "filePath": customModel.path,
+    //       "size": customModel.size,
+    //       "hash": customModel.hash,
+    //       "name": customModel.name,
+    //     ])
+    //   case let .failure(error):
+    //     result.error(nil, nil, nil, error)
+    //   }
+    // }
   }
 
   internal func deleteDownloadedModel(arguments: [String: Any], result: FLTFirebaseMethodCallResult) {

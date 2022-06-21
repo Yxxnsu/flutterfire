@@ -1,20 +1,35 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ml_model_downloader/firebase_ml_model_downloader.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-const kModelName = "mobilenet_v1_1_0_224";
+const kModelName = "test";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp(
+  //   options: const FirebaseOptions(
+  //     apiKey: 'AIzaSyAHAsf51D0A407EklG1bs-5wA7EbyfNFg0',
+  //     appId: '1:448618578101:ios:3a3c8ae9cb0b6408ac3efc',
+  //     messagingSenderId: '448618578101',
+  //     projectId: 'react-native-firebase-testing',
+  //     authDomain: 'react-native-firebase-testing.firebaseapp.com',
+  //     iosClientId:
+  //         '448618578101-m53gtqfnqipj12pts10590l37npccd2r.apps.googleusercontent.com',
+  //   ),
+  // );
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: 'AIzaSyAHAsf51D0A407EklG1bs-5wA7EbyfNFg0',
-      appId: '1:448618578101:ios:3a3c8ae9cb0b6408ac3efc',
-      messagingSenderId: '448618578101',
-      projectId: 'react-native-firebase-testing',
-      authDomain: 'react-native-firebase-testing.firebaseapp.com',
+      apiKey: 'AIzaSyCPrVGSuuLxinGX8odbEaxez1wLfshOxaY',
+      appId: '1:1080692587008:ios:16a8698faea5765d8376e5',
+      messagingSenderId: '1080692587008',
+      projectId: 'flufire-yeonsu',
+      storageBucket: 'flufire-yeonsu.appspot.com',
       iosClientId:
-          '448618578101-m53gtqfnqipj12pts10590l37npccd2r.apps.googleusercontent.com',
+          '1080692587008-hf1pdj4669ctbd6tfiaunuv91p7dji3m.apps.googleusercontent.com',
+      iosBundleId: 'com.examp',
     ),
   );
   runApp(const MyApp());
@@ -35,15 +50,35 @@ class _MyAppState extends State<MyApp> {
   }
 
   FirebaseCustomModel? model;
+  List<FirebaseCustomModel>? models;
 
   /// Initially get the lcoal model if found, and asynchronously get the latest one in background.
   initWithLocalModel() async {
     final _model = await FirebaseModelDownloader.instance.getModel(
-        kModelName, FirebaseModelDownloadType.localModelUpdateInBackground);
-
+      kModelName,
+      FirebaseModelDownloadType.localModelUpdateInBackground,
+    );
     setState(() {
       model = _model;
     });
+  }
+
+  Future<void> get initGetModelList async {
+    late List<FirebaseCustomModel> _models;
+    _models = await FirebaseModelDownloader.instance.listDownloadedModels();
+    setState(() {
+      models = _models;
+    });
+  }
+
+  void uploadTempData() {
+    FirebaseFirestore.instance
+        .collection('TEST')
+        .add(
+          {'name': 'hello'},
+        )
+        .then((value) => print('Data Added'))
+        .catchError((error) => print("Failed to add user: $error"));
   }
 
   @override
@@ -84,10 +119,11 @@ class _MyAppState extends State<MyApp> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
-                          final _model = await FirebaseModelDownloader.instance
-                              .getModel(kModelName,
-                                  FirebaseModelDownloadType.latestModel);
-
+                          final _model =
+                              await FirebaseModelDownloader.instance.getModel(
+                            kModelName,
+                            FirebaseModelDownloadType.latestModel,
+                          );
                           setState(() {
                             model = _model;
                           });
@@ -101,7 +137,6 @@ class _MyAppState extends State<MyApp> {
                         onPressed: () async {
                           await FirebaseModelDownloader.instance
                               .deleteDownloadedModel(kModelName);
-
                           setState(() {
                             model = null;
                           });
@@ -110,6 +145,24 @@ class _MyAppState extends State<MyApp> {
                       ),
                     ),
                   ],
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await initGetModelList;
+                      // uploadTempData();
+                      models!.isEmpty
+                          ? print('model is null')
+                          : models!.forEach(
+                              (element) {
+                                print(element.name);
+                              },
+                            );
+                    },
+                    child: const Text(
+                      'test',
+                    ),
+                  ),
                 ),
               ],
             ),
